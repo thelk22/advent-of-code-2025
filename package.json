@@ -1,0 +1,8 @@
+{
+  "name": "advent-of-code-2025",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:thelk22/advent-of-code-2025.git",
+  "author": "Luke Kirwan <luke.kirwan@propelleraero.com.au>",
+  "license": "MIT"
+}
