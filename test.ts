@@ -13,3 +13,10 @@ console.log(res);
 
 res = 3 % 99;
 console.log(res);
+
+res = -4 % 99;
+console.log(res);
+
+const prev = 3;
+const next = -6;
+console.log((prev + next) % 99);
