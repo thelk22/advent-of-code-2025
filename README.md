@@ -1,0 +1,3 @@
+# Advent of Code 2025 🎅
+
+Solving for the 12 days of Christmas.
