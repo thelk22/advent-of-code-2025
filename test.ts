@@ -1,6 +1,6 @@
 /*
-* A test file that can be run with ts-node for working out how things work in TypeScript.
-*/
+ * A test file that can be run with ts-node for working out how things work in TypeScript.
+ */
 
 let res = 100 % 99;
 console.log(res);
