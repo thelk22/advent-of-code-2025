@@ -2,21 +2,14 @@
  * A test file that can be run with ts-node for working out how things work in TypeScript.
  */
 
-let res = 100 % 99;
-console.log(res);
+const bank = ["5", "9", "8", "3", "2", "7", "4", "6", "1", "0"];
 
-res = 99 % 99;
-console.log(res);
+const maxVoltage = bank
+  .map((battery, index) => [Number(battery), index])
+  .sort((a, b) => b[0] - a[0])
+  .slice(0, 6)
+  .sort((a, b) => a[1] - b[1])
+  .map(([battery, index]) => battery)
+  .join("");
 
-res = 198 % 99;
-console.log(res);
-
-res = 3 % 99;
-console.log(res);
-
-res = -4 % 99;
-console.log(res);
-
-const prev = 3;
-const next = -6;
-console.log((prev + next) % 99);
+console.log("Max voltage: ", maxVoltage);
