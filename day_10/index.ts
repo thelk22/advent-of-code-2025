@@ -18,6 +18,13 @@ type QueueNode = {
   joltageConfig: number[];
 };
 
+type QueueNodeWithHeuristic = {
+  lightConfig: LightConfig;
+  nPresses: number;
+  joltageConfig: number[];
+  distanceFromTarget: number;
+};
+
 const pressButton = (currentLightConfig: number[], button: Button) => {
   if (currentLightConfig.length !== button.length) {
     throw new Error("Button and light config length mismatch");
@@ -32,6 +39,15 @@ const applyVoltage = (currentLightConfig: number[], button: Button) => {
     throw new Error("Button and light config length mismatch");
   }
   return currentLightConfig.map((lightOn, index) => lightOn + button[index]);
+};
+
+const distanceBetween = (currentVoltage: number[], targetVoltage: number[]) => {
+  if (currentVoltage.length !== targetVoltage.length) {
+    throw new Error("Voltage config length mismatch");
+  }
+  return currentVoltage.reduce((acc, voltage, index) => {
+    return acc + Math.abs(voltage - targetVoltage[index]);
+  }, 0);
 };
 
 export function taskA(inputFilePath: string) {
@@ -198,8 +214,9 @@ export function taskB(inputFilePath: string) {
 
   // console.log("input", JSON.stringify(input));
 
-  const minPressesPerInstruction = input.map(
-    ({ buttons, desiredJoltageConfig }) => {
+  const minPressesPerInstruction = input
+    .slice(3, 4)
+    .map(({ buttons, desiredJoltageConfig }) => {
       // console.log(
       //   "Considering instruction with desired joltage config",
       //   desiredJoltageConfig
@@ -215,8 +232,16 @@ export function taskB(inputFilePath: string) {
       // Use dictionary for fast lookups where ID is the joltage config as a string
       // and value is the min presses (so far) to reach that config
       let minJoltages: { [id: string]: number } = {};
-      let queue: QueueNode[] = [
-        { lightConfig: [], nPresses: 0, joltageConfig: initialJoltageConfig },
+      let queue: QueueNodeWithHeuristic[] = [
+        {
+          lightConfig: [],
+          nPresses: 0,
+          joltageConfig: initialJoltageConfig,
+          distanceFromTarget: distanceBetween(
+            initialJoltageConfig,
+            desiredJoltageConfig
+          ),
+        },
       ];
 
       while (queue.length > 0) {
@@ -225,15 +250,15 @@ export function taskB(inputFilePath: string) {
         // console.log("nodes visited so far", visitedLightConfigs);
 
         // Pop next node from queue (the one with the lowest number of presses)
-        queue.sort((a, b) => a.nPresses - b.nPresses);
+        queue.sort((a, b) => a.distanceFromTarget - b.distanceFromTarget);
         const nodeToCheck = queue[0];
         queue = queue.slice(1);
 
-        console.log("Current queue", queue);
-        console.log(
-          "Number of nodes aware of cost",
-          Object.keys(minJoltages).length
-        );
+        // console.log("Current queue", queue);
+        // console.log(
+        //   "Number of nodes aware of cost",
+        //   Object.keys(minJoltages).length
+        // );
 
         // console.log("Checking node", nodeToCheck.lightConfig);
         // console.log("Presses to reach node", nodeToCheck.nPresses);
@@ -241,6 +266,12 @@ export function taskB(inputFilePath: string) {
         if (!nodeToCheck) {
           throw new Error("Queue empty unexpectedly");
         }
+
+        console.log("Joltage config to check:", nodeToCheck.joltageConfig);
+        console.log(
+          "Current distance from target:",
+          nodeToCheck.distanceFromTarget
+        );
 
         if (nodeToCheck.joltageConfig.join("") === desiredJoltageId) {
           minPresses = nodeToCheck.nPresses;
@@ -279,19 +310,34 @@ export function taskB(inputFilePath: string) {
           const jcId = joltageConfig.join("");
           if (!minJoltages[jcId]) {
             minJoltages[jcId] = nPresses;
-            queue.push({ lightConfig: [], nPresses, joltageConfig });
+            queue.push({
+              lightConfig: [],
+              nPresses,
+              joltageConfig,
+              distanceFromTarget: distanceBetween(
+                joltageConfig,
+                desiredJoltageConfig
+              ),
+            });
             return;
           }
           if (nPresses < minJoltages[jcId]) {
             minJoltages[jcId] = nPresses;
-            queue.push({ lightConfig: [], nPresses, joltageConfig });
+            queue.push({
+              lightConfig: [],
+              nPresses,
+              joltageConfig,
+              distanceFromTarget: distanceBetween(
+                joltageConfig,
+                desiredJoltageConfig
+              ),
+            });
             return;
           }
         });
       }
 
       return minPresses;
-    }
-  );
+    });
   return minPressesPerInstruction.reduce((a, b) => a + b, 0);
 }

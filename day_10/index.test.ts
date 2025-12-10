@@ -25,9 +25,9 @@ describe("Run task B", () => {
     // assert.equal(result, 33);
   });
 
-  // it("with real input", () => {
-  //   const result = taskB(inputFilePath);
-  //   console.log("Result: ", result);
-  //   // We don't know the answer!
-  // });
+  it("with real input", () => {
+    const result = taskB(inputFilePath);
+    console.log("Result: ", result);
+    // We don't know the answer!
+  });
 });
