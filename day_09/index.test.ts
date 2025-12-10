@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { describe, it } from "node:test";
 import { taskA, taskB } from ".";
 
@@ -8,7 +9,7 @@ describe("Run task A", () => {
   it("with test input", () => {
     const result = taskA(testInputFilePath);
     console.log("Result: ", result);
-    // assert.equal(result, 40);
+    assert.equal(result, 40);
   });
 
   // ✔ Run task A (211.169083ms)
@@ -23,7 +24,7 @@ describe("Run task B", () => {
   it("with test input", () => {
     const result = taskB(testInputFilePath);
     console.log("Result: ", result);
-    // assert.equal(result, 24);
+    assert.equal(result, 24);
   });
 
   // ✔ Run task B (1464.848792ms)
