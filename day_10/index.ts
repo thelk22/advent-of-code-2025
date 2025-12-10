@@ -1,4 +1,6 @@
+import { solve } from "yalps";
 import { readFileLines } from "../utils/readFile";
+import { transpose } from "../utils/transpose";
 
 // List of light states, 0 = off, 1 = on
 type LightConfig = number[];
@@ -172,10 +174,8 @@ export function taskB(inputFilePath: string) {
 
   // So now we need to implement Dijkstra's algorithm
 
-  // Step 1: Parse the input into the light config and the buttons
-  // Step 2: Implement a function for applying a button press optimally
-  // Step 3: Initialise the light config to all off
-  // Step 4: Implement Dijkstra's algorithm to find the minimum button presses to reach the desired config
+  // EDIT: Djikstra's is still too slow, need to implement A* search with heuristic
+  // EDIT: A* is still too slow, need a mathematical approach... will try in taskBv2
 
   const input = readFileLines(inputFilePath).map((line) => {
     const instructions = line.split(" ");
@@ -340,4 +340,22 @@ export function taskB(inputFilePath: string) {
       return minPresses;
     });
   return minPressesPerInstruction.reduce((a, b) => a + b, 0);
+}
+
+export function taskBV2(inputFilePath: string) {
+  // PSEUDO CODE:
+  // Need a mathematical approach to solve this problem efficiently
+  // Solve the linear system of equations aX = b where:
+  // - A is the button matrix (a matrix of 0s and 1s where each column is the effect of a button)
+  // - X is the vector of button presses (how many times to press each button)
+  // - B is the desired joltage configuration
+
+  // This is an undetermined system (more variables than equations), so we need to use ILP (integer linear programming) 
+  // to find the optimal solution
+  // We want to minimize the number of button presses (sum of variables)
+  // Subject to the constraint that the linear combination of button effects equals requiredJoltage
+
+  // Tried some libraries in typescript, no avail. Tried some libraries in python, also no avail
+
+  // I am well and truly defeated
 }
