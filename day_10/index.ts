@@ -1,6 +1,12 @@
-import { solve } from "yalps";
+/*
+TL;DR: this day was tough! Part A was straightforward BFS, but Part B required
+an ILP (integer linear programming) approach since BFS, Djikstra, A* were all 
+too slow. I struggled to implement these in Typescript so I moved to Python.
+
+Have a look at day_10/index.py for the solution to Part B.
+*/
+
 import { readFileLines } from "../utils/readFile";
-import { transpose } from "../utils/transpose";
 
 // List of light states, 0 = off, 1 = on
 type LightConfig = number[];
@@ -355,7 +361,7 @@ export function taskBV2(inputFilePath: string) {
   // We want to minimize the number of button presses (sum of variables)
   // Subject to the constraint that the linear combination of button effects equals requiredJoltage
 
-  // Tried some libraries in typescript, no avail. Tried some libraries in python, also no avail
-
-  // I am well and truly defeated
+  // Tried some libraries in typescript, no avail...
+  
+  // Moving to Python! Look for day_10/index.py
 }
