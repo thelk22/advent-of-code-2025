@@ -26,6 +26,7 @@ describe("Run task B", () => {
     // assert.equal(result, 33);
   });
 
+  // Completed part B in Python in day_10/index.py
   // it("with real input", () => {
   //   const result = taskBV2(inputFilePath);
   //   console.log("Result: ", result);
