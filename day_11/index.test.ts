@@ -13,21 +13,22 @@ describe("Run task A", () => {
     assert.equal(result, 5);
   });
 
-  // it("with real input", () => {
-  //   const result = taskA(inputFilePath);
-  //   console.log("Result: ", result);
-  //   // We don't know the answer!
-  // });
+  // ✔ with real input (4.757375ms)
+  it("with real input", () => {
+    const result = taskA(inputFilePath);
+    console.log("Result: ", result);
+    // We don't know the answer!
+  });
 });
 
 describe("Run task B", () => {
   it("with test input", () => {
     const result = taskB(testInputFilePathB);
     console.log("Result: ", result);
-    // assert.equal(result, 33);
+    assert.equal(result, 2);
   });
 
-  // Completed part B in Python in day_10/index.py
+  // ✔ with real input (499.021375ms)
   it("with real input", () => {
     const result = taskB(inputFilePath);
     console.log("Result: ", result);

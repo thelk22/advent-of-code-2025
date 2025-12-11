@@ -1,3 +1,15 @@
+/*
+TL:DR: Graph traversal problem to find all paths between nodes without constrants (part A)
+and with constraints (part B).
+
+Implemented depth first search which worked well for part A. 
+The starting node for part B as well as the constraints made it more complex. The key was to 
+cache intermediate results so that we didn't have to recalculate paths multiple times.
+
+For part B I was getting OOM errors due to a bug in the code, where I was checking for falsey
+values instead of explicitly checking for undfined. This was bad as 0 is a valid path count!
+*/
+
 import { readFileLines } from "../utils/readFile";
 
 export function taskA(inputFilePath: string) {
@@ -120,19 +132,12 @@ export function taskB(inputFilePath: string) {
   let pathCounts: {[node: string]: number} = {};
 
   function findPathsDfs(currentNode: string, targetNode: string, hasSeenDac: boolean, hasSeenFft: boolean): number {
-    if (currentNode === targetNode) {
-      if (hasSeenDac && hasSeenFft) {
-        pathCounts[targetNode] = 1;
-        return 1;
-      } 
+    if (currentNode === targetNode && hasSeenDac && hasSeenFft) {
+      pathCounts[targetNode] = 1;
+      return 1;
     }
 
     let pathCount = 0;
-    const cacheId = `${currentNode}-${hasSeenDac}-${hasSeenFft}`;
-
-    if (pathCounts[cacheId]) {
-      return pathCounts[cacheId];
-    }
 
     if (!edges[currentNode]) {
       console.log("No edges for node: ", currentNode);
@@ -148,22 +153,22 @@ export function taskB(inputFilePath: string) {
 
     for (const neighbor of edges[currentNode]) {
       const neighborCacheId = `${neighbor}-${hasSeenDac}-${hasSeenFft}`;
-      if (pathCounts[neighborCacheId]) {
+      // Checking for undefined is super important because 0 is a valid path count!
+      if (pathCounts[neighborCacheId] !== undefined) {
         pathCount += pathCounts[neighborCacheId];
         continue;
       }
       const neighborPathCount = findPathsDfs(neighbor, targetNode, hasSeenDac, hasSeenFft);
+      pathCounts[neighborCacheId] = neighborPathCount;
       pathCount += neighborPathCount;
-      
     }
-
-    pathCounts[cacheId] = pathCount;
 
     console.log("Finished with node: ", currentNode);
     console.log("Current path counts: ", pathCounts);
     return pathCount;
   }
 
+  console.log("Final path counts: ", pathCounts);
   return findPathsDfs("svr", "out", false, false);
   
 }
