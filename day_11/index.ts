@@ -119,35 +119,51 @@ export function taskB(inputFilePath: string) {
 
   let pathCounts: {[node: string]: number} = {};
 
-  function findPathsDfs(currentNode: string, targetNode: string): number {
-    console.log("Visiting node: ", currentNode);
-    console.log("Current path counts: ", pathCounts);
+  function findPathsDfs(currentNode: string, targetNode: string, hasSeenDac: boolean, hasSeenFft: boolean): number {
     if (currentNode === targetNode) {
-      pathCounts[targetNode] = 1;
-      return 1;
+      if (hasSeenDac && hasSeenFft) {
+        pathCounts[targetNode] = 1;
+        return 1;
+      } 
     }
 
     let pathCount = 0;
+    const cacheId = `${currentNode}-${hasSeenDac}-${hasSeenFft}`;
+
+    if (pathCounts[cacheId]) {
+      return pathCounts[cacheId];
+    }
 
     if (!edges[currentNode]) {
       console.log("No edges for node: ", currentNode);
       return 0;
     }
 
+    if (currentNode === "dac") {
+      hasSeenDac = true;
+    }
+    if (currentNode === "fft") {
+      hasSeenFft = true;
+    }
+
     for (const neighbor of edges[currentNode]) {
-      if (pathCounts[neighbor]) {
-        pathCount += pathCounts[neighbor];
+      const neighborCacheId = `${neighbor}-${hasSeenDac}-${hasSeenFft}`;
+      if (pathCounts[neighborCacheId]) {
+        pathCount += pathCounts[neighborCacheId];
         continue;
       }
-      const neighborPathCount = findPathsDfs(neighbor, targetNode);
+      const neighborPathCount = findPathsDfs(neighbor, targetNode, hasSeenDac, hasSeenFft);
       pathCount += neighborPathCount;
       
     }
-    pathCounts[currentNode] = pathCount;
 
+    pathCounts[cacheId] = pathCount;
+
+    console.log("Finished with node: ", currentNode);
+    console.log("Current path counts: ", pathCounts);
     return pathCount;
   }
 
-  return findPathsDfs("svr", "out");
+  return findPathsDfs("svr", "out", false, false);
   
 }
