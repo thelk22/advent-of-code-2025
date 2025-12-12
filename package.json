@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test": "tsx --test **/*.test.ts",
-    "test:day": "tsx --test day_11/index.test.ts",
+    "test:day": "tsx --test day_12/index.test.ts",
     "tsc": "tsc --noEmit",
     "lint:check": "prettier --check .",
     "lint:fix": "prettier --write .",
