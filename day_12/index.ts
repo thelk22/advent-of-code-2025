@@ -1,3 +1,10 @@
+/* 
+TL;DR: Writing an algorithm to solve this problem is hard. Even with many optimisations it would likely still
+be inefficient given the number of possible permutations to check before being sure of an answer. 
+
+Fortunately, the (real) input set allowed us to rule out all of the regions based on two simple checks! 
+*/ 
+
 import { readFileLines } from "../utils/readFile";
 
 type ShapeDetails = {
@@ -64,6 +71,81 @@ function calculatePermutations(shape: number[][]): number[][][] {
 // }
 
 
+export function testA(inputFilePath: string) {
+
+  // IDEA: 
+  // Merge each shape with itself, what is the smallest rectangle it can cover?
+
+  const lines = readFileLines(inputFilePath);
+  console.log("Input lines: ", lines);
+
+  const lineContainingFirstRegion = lines.findIndex((line) => line.includes("x"));
+  console.log("Line containing first region: ", lineContainingFirstRegion);
+  
+  const shapes = lines.slice(0, lineContainingFirstRegion).filter(line => line.trim() !== "")
+    .filter(item => !item.includes(":")).reduce((acc, shapeLine, index) => {
+        if (index % 3 === 0) {
+          acc.push([shapeLine.trim().split("").map(cell => cell === "#" ? 1 : 0)]);
+        } else {
+          acc[acc.length - 1].push(shapeLine.trim().split("").map(cell => cell === "#" ? 1 : 0));
+          
+        }
+        return acc;
+      }, [] as number[][][])
+    .map(shape => ({shape, density: density(shape), permutations: calculatePermutations(shape)}))
+    // .sort((a, b) => b.density - a.density)
+    .reduce((acc, shapeDetails, index) => ({...acc, [index]: shapeDetails}), {} as Record<number, ShapeDetails>);
+
+  const regions = lines.slice(lineContainingFirstRegion).filter(line => line.trim() !== "").map(line => {
+    const [sizeStr, requiredShapesStr] = line.split(":").map(part => part.trim());
+    const [colsStr, rowsStr] = sizeStr.split("x").map(part => part.trim());
+    const rows = parseInt(rowsStr, 10);
+    const cols = parseInt(colsStr, 10);
+    const requiredShapes = requiredShapesStr.split(" ").map(s => s.trim()).reduce((acc, shape, index) => {
+      acc[index] = (acc[index] || 0) + Number(shape);
+      return acc;
+    }, {} as Record<string, number>);
+    return {
+      rows,
+      cols,
+      requiredShapes,
+    };
+  });
+
+  let nValidRegions = 0;
+
+  for (const region of regions) {
+    const nSlots = Math.floor(region.rows / 3) * Math.floor(region.cols / 3);
+    const nRequiredShapes = Object.values(region.requiredShapes).reduce((acc, count) => acc + count, 0);
+
+    console.log("----- Region -----");
+
+    const availableArea = region.rows * region.cols;
+    const totalRequiredFills = Object.entries(region.requiredShapes).reduce((acc, [shapeIndex, count]) => {
+      const shapeDetails = shapes[Number(shapeIndex)];
+      return acc + (shapeDetails.density * count);
+    }, 0);
+
+    console.log("Enough slots to place shapes separately: ", nSlots >= nRequiredShapes);
+    console.log("Enough area to place shapes separately: ", availableArea >= totalRequiredFills);
+
+    if (nSlots >= nRequiredShapes) {
+      console.log("Valid region: not enough area to place required shapes")
+      nValidRegions += 1;
+      continue;
+    } else if (availableArea < totalRequiredFills) {
+      console.log("Invalid region: not enough area to place required shapes")
+      continue;
+    } else {
+      console.log("Potentially valid region: further analysis required");
+      console.log("Area: ", availableArea, "Required fills: ", totalRequiredFills);
+    }
+
+  }
+
+  return nValidRegions;
+  
+}
 
 export function taskA(inputFilePath: string) {
   // PSEUDO CODE:
@@ -102,6 +184,11 @@ export function taskA(inputFilePath: string) {
   // ---- E.g. if remaining shapes cannot possibly fill remaining space
   // ---- Or if total number of required 1s exceeds available space in region
 
+  // Buuuuuuuut first, let's see which regions we can rule out based on some simple checks:
+  // 1. Do we have enough slots to just place each shape separately without doing any merging? If so, it's valid
+  // 2. Do we have enough area to place all required shapes? If not, it's invalid
+  // Then whatever is leftover we will need to do some smart algo on. 
+
   const lines = readFileLines(inputFilePath);
   console.log("Input lines: ", lines);
 
@@ -119,7 +206,6 @@ export function taskA(inputFilePath: string) {
         return acc;
       }, [] as number[][][])
     .map(shape => ({shape, density: density(shape), permutations: calculatePermutations(shape)}))
-    .sort((a, b) => b.density - a.density)
     .reduce((acc, shapeDetails, index) => ({...acc, [index]: shapeDetails}), {} as Record<number, ShapeDetails>);
 
   const regions = lines.slice(lineContainingFirstRegion).filter(line => line.trim() !== "").map(line => {
@@ -138,46 +224,37 @@ export function taskA(inputFilePath: string) {
     };
   });
 
-  console.log("Shapes: ", shapes);
-  console.log("Regions: ", regions);
+  let nValidRegions = 0;
 
   for (const region of regions) {
-    console.log("Solving region: ", region);
+    const nSlots = Math.floor(region.rows / 3) * Math.floor(region.cols / 3);
+    const nRequiredShapes = Object.values(region.requiredShapes).reduce((acc, count) => acc + count, 0);
 
-    let initialGrid = Array.from({ length: region.rows }, () => Array(region.cols).fill(0));
-    console.log("Initial grid: ", initialGrid);
+    console.log("----- Region -----");
 
+    const availableArea = region.rows * region.cols;
     const totalRequiredFills = Object.entries(region.requiredShapes).reduce((acc, [shapeIndex, count]) => {
       const shapeDetails = shapes[Number(shapeIndex)];
       return acc + (shapeDetails.density * count);
     }, 0);
-    const spaceInGrid = region.rows * region.cols;
 
-    if (totalRequiredFills > spaceInGrid) {
-      console.log("Impossible to fill region, required fills exceed space in grid");
+    console.log("Enough slots to place shapes separately: ", nSlots >= nRequiredShapes);
+    console.log("Enough area to place shapes separately: ", availableArea >= totalRequiredFills);
+
+    if (nSlots >= nRequiredShapes) {
+      console.log("Valid region: not enough area to place required shapes")
+      nValidRegions += 1;
       continue;
+    } else if (availableArea < totalRequiredFills) {
+      console.log("Invalid region: not enough area to place required shapes")
+      continue;
+    } else {
+      console.log("Potentially valid region: further analysis required");
+      console.log("Area: ", availableArea, "Required fills: ", totalRequiredFills);
     }
 
-    // Implement the recursive backtracking algorithm here to fill the region
-    // with the available shapes.
-
-    // Find the location on the grid to place the next shape
-    // Get the highest density shape
-    // Try to place it in all orientations
-    // Use the placement that minimises the density of the shapes placed so far
-    // If it fits, place it, and recurse
-    // If recursion returns success, return success
-    // If recursion returns failure, remove shape and try next orientation/shape
-
-    // If no shapes fit, return failure
-
-    console.log("Finished solving region");
   }
-}
 
-export function taskB(inputFilePath: string) {
-  // PSEUDO CODE:
-
-  const lines = readFileLines(inputFilePath);
-  console.log("Input lines: ", lines);
+  return nValidRegions;
+  
 }
